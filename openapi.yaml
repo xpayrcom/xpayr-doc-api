@@ -1,0 +1,1491 @@
+openapi: 3.0.3
+info:
+  title: XPayr Merchant API
+  version: "1.0.0"
+  description: |
+    Official OpenAPI contract for XPayr Merchant API v1.
+
+    Base production URL: `https://xpayr.com/api/v1`
+
+    This specification reflects the public docs at `/doc-api` and the repository markdown guides.
+  contact:
+    name: XPayr
+    url: https://xpayr.com/contact
+  x-api-id: xpayr-merchant-api-v1
+servers:
+  - url: https://xpayr.com/api/v1
+    description: Production
+
+tags:
+  - name: health
+    description: Service availability checks
+  - name: payments
+    description: Payment session lifecycle
+  - name: merchant
+    description: Merchant profile, balances, keys, and network catalog
+  - name: webhooks
+    description: Webhook registration and test delivery
+  - name: agent-commerce
+    description: Policy-driven AI agent transaction workflows
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags: [health]
+      summary: Health check
+      description: Returns API status used by docs and integration monitors.
+      operationId: getHealth
+      security: []
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              examples:
+                ok:
+                  value:
+                    status: ok
+                    service: xpayr-api
+                    version: v1
+                    timestamp: "2026-03-11T10:15:00Z"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /payments:
+    post:
+      tags: [payments]
+      summary: Create payment session
+      operationId: createPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentRequest"
+            examples:
+              default:
+                value:
+                  amount: "9.99"
+                  currency: USDC
+                  network: bsc-testnet
+                  order_id: ORDER-1001
+                  description: Test payment
+                  ipn_callback_url: https://yourdomain.com/webhook/xpayr
+                  metadata:
+                    source: api-doc
+      responses:
+        "200":
+          description: Payment session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentSession"
+              examples:
+                created:
+                  value:
+                    id: ps_42f492dedc5b665b8511852de5ea0325
+                    invoice_id: 6265178012
+                    object: payment_session
+                    amount: "9.99"
+                    currency: USDC
+                    network: bsc-testnet
+                    status: pending
+                    payment_url: https://xpayr.com/pay/ps_42f492dedc5b665b8511852de5ea0325
+                    expires_at: "2026-02-12T16:00:00+00:00"
+                    livemode: false
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "422":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+    get:
+      tags: [payments]
+      summary: List payment sessions
+      operationId: listPayments
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+        - in: query
+          name: status
+          schema:
+            type: string
+            example: pending
+          description: Optional status filter
+        - in: query
+          name: network
+          schema:
+            type: string
+            example: bsc-testnet
+          description: Optional network filter
+      responses:
+        "200":
+          description: Paginated payment sessions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentListResponse"
+              examples:
+                list:
+                  value:
+                    object: list
+                    data:
+                      - id: ps_42f492dedc5b665b8511852de5ea0325
+                        invoice_id: 6265178012
+                        object: payment_session
+                        amount: "9.99"
+                        currency: USDC
+                        network: bsc-testnet
+                        status: pending
+                        payment_url: https://xpayr.com/pay/ps_42f492dedc5b665b8511852de5ea0325
+                        expires_at: "2026-02-12T16:00:00+00:00"
+                        livemode: false
+                    pagination:
+                      page: 1
+                      limit: 25
+                      total: 1
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /payments/{id}:
+    get:
+      tags: [payments]
+      summary: Get payment session
+      operationId: getPayment
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            example: ps_42f492dedc5b665b8511852de5ea0325
+      responses:
+        "200":
+          description: Payment session details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentSession"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /payments/{id}/complete:
+    post:
+      tags: [payments]
+      summary: Complete payment session
+      description: Confirms payment session after on-chain transaction confirmation.
+      operationId: completePayment
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            example: ps_42f492dedc5b665b8511852de5ea0325
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompletePaymentRequest"
+            examples:
+              complete:
+                value:
+                  tx_hash: 0x1111111111111111111111111111111111111111111111111111111111111111
+                  from_address: 0x2222222222222222222222222222222222222222
+                  chain_id: 97
+      responses:
+        "200":
+          description: Payment session completed or accepted for processing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentSession"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+        "422":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /me:
+    get:
+      tags: [merchant]
+      summary: Get merchant profile
+      operationId: getMerchant
+      responses:
+        "200":
+          description: Merchant profile and key mode details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MerchantProfile"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /me/balance:
+    get:
+      tags: [merchant]
+      summary: Get merchant balances
+      operationId: getMerchantBalance
+      responses:
+        "200":
+          description: Confirmed balance totals grouped by network and currency
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MerchantBalanceResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /me/keys/regenerate:
+    post:
+      tags: [merchant]
+      summary: Regenerate API key
+      description: Regenerates secret key for selected mode. Secret key is returned once.
+      operationId: regenerateMerchantKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegenerateKeyRequest"
+            examples:
+              testMode:
+                value:
+                  mode: test
+      responses:
+        "200":
+          description: New key material
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegenerateKeyResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /me/networks:
+    get:
+      tags: [merchant]
+      summary: Get network and currency catalog
+      operationId: getMerchantNetworks
+      description: Returns available networks and supported currencies for current key mode.
+      responses:
+        "200":
+          description: Dynamic catalog
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NetworkCatalogResponse"
+              examples:
+                sample:
+                  value:
+                    object: network_catalog
+                    data:
+                      - network_key: bsc-testnet
+                        network_name: BSC Testnet
+                        is_testnet: true
+                        currencies:
+                          - symbol: USDC
+                            display_name: USDC
+                            decimals: 18
+                          - symbol: USDT
+                            display_name: USDT
+                            decimals: 18
+                    livemode: false
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /webhooks:
+    post:
+      tags: [webhooks]
+      summary: Register webhook URL
+      operationId: createWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWebhookRequest"
+            examples:
+              register:
+                value:
+                  url: https://yourdomain.com/webhooks/xpayr
+      responses:
+        "200":
+          description: Webhook registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookConfigResponse"
+              examples:
+                created:
+                  value:
+                    url: https://yourdomain.com/webhooks/xpayr
+                    secret: whsec_redacted_once
+                    events:
+                      - payment.pending
+                      - payment.processing
+                      - payment.completed
+                      - payment.failed
+                      - payment.expired
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "422":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+    get:
+      tags: [webhooks]
+      summary: Get webhook configuration
+      operationId: getWebhook
+      responses:
+        "200":
+          description: Current webhook settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookConfigResponse"
+              examples:
+                current:
+                  value:
+                    url: https://yourdomain.com/webhooks/xpayr
+                    secret_masked: whsec_****
+                    events:
+                      - payment.pending
+                      - payment.processing
+                      - payment.completed
+                      - payment.failed
+                      - payment.expired
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+    delete:
+      tags: [webhooks]
+      summary: Delete webhook configuration
+      operationId: deleteWebhook
+      responses:
+        "200":
+          description: Webhook removed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success]
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /webhooks/test:
+    post:
+      tags: [webhooks]
+      summary: Send test webhook event
+      operationId: testWebhook
+      responses:
+        "200":
+          description: Test delivery triggered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookTestResponse"
+              examples:
+                testSent:
+                  value:
+                    success: true
+                    event: payment.pending
+                    delivery_id: whdel_7e8d3af3
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "422":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /agents:
+    post:
+      tags: [agent-commerce]
+      summary: Create agent identity
+      operationId: createAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAgentRequest"
+            examples:
+              create:
+                value:
+                  name: Auto Buyer Bot
+                  description: Top-up automation
+                  mode: test
+      responses:
+        "200":
+          description: Agent created, one-time agent key returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateAgentResponse"
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /agents/{agent_public_id}/policy:
+    put:
+      tags: [agent-commerce]
+      summary: Update agent policy
+      operationId: updateAgentPolicy
+      parameters:
+        - in: path
+          name: agent_public_id
+          required: true
+          schema:
+            type: string
+            example: agp_8f3f0f8f8f8f
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentPolicyRequest"
+      responses:
+        "200":
+          description: Policy updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success]
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /agent-intents:
+    post:
+      tags: [agent-commerce]
+      summary: Submit agent intent
+      description: |
+        Runtime endpoint for agent keys (`ag_test_*` / `ag_live_*`).
+        Merchant secret keys can be used for administrative testing depending on deployment policy.
+      operationId: createAgentIntent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentIntentRequest"
+            examples:
+              intent:
+                value:
+                  amount: 20
+                  token: USDT
+                  network: tron
+                  target_ref: order_123
+                  category: normal
+      responses:
+        "200":
+          description: Decision outcome for submitted intent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentIntentDecisionResponse"
+              examples:
+                pendingApproval:
+                  value:
+                    object: agent_intent_decision
+                    data:
+                      intent_id: agi_xxx
+                      decision: pending_approval
+                      reason_code: manual_approval_required
+                      next_step: awaiting_merchant_approval
+        "400":
+          $ref: "#/components/responses/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "422":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+    get:
+      tags: [agent-commerce]
+      summary: List agent intents
+      operationId: listAgentIntents
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [approved, pending_approval, rejected]
+            example: pending_approval
+      responses:
+        "200":
+          description: Paginated intent list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentIntentListResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /agent-intents/{intent_id}:
+    get:
+      tags: [agent-commerce]
+      summary: Get agent intent detail
+      operationId: getAgentIntent
+      parameters:
+        - in: path
+          name: intent_id
+          required: true
+          schema:
+            type: string
+            example: agi_01HXYZABC123
+      responses:
+        "200":
+          description: Intent details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentIntent"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /agent-intents/{intent_id}/bridge:
+    post:
+      tags: [agent-commerce]
+      summary: Bridge approved intent to payment session
+      operationId: bridgeAgentIntent
+      parameters:
+        - in: path
+          name: intent_id
+          required: true
+          schema:
+            type: string
+            example: agi_01HXYZABC123
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentBridgeRequest"
+      responses:
+        "200":
+          description: Bridge result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentBridgeResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+        "422":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /agent-intents/summary:
+    get:
+      tags: [agent-commerce]
+      summary: Get agent intent and approval summary
+      operationId: getAgentIntentSummary
+      responses:
+        "200":
+          description: Summary metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentSummaryResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /agent-approvals:
+    get:
+      tags: [agent-commerce]
+      summary: List pending approvals
+      operationId: listAgentApprovals
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+        - in: query
+          name: status
+          schema:
+            type: string
+            example: pending
+      responses:
+        "200":
+          description: Approval queue list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentApprovalListResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /agent-approvals/{intent_id}/approve:
+    post:
+      tags: [agent-commerce]
+      summary: Approve pending intent
+      operationId: approveAgentIntent
+      parameters:
+        - in: path
+          name: intent_id
+          required: true
+          schema:
+            type: string
+            example: agi_01HXYZABC123
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentApprovalActionRequest"
+            examples:
+              approveWithBridge:
+                value:
+                  notes: Looks valid
+                  auto_bridge: true
+                  bridge_overrides:
+                    success_url: https://example.com/success
+                    cancel_url: https://example.com/cancel
+      responses:
+        "200":
+          description: Intent approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentApprovalActionResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+        "422":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /agent-approvals/{intent_id}/reject:
+    post:
+      tags: [agent-commerce]
+      summary: Reject pending intent
+      operationId: rejectAgentIntent
+      parameters:
+        - in: path
+          name: intent_id
+          required: true
+          schema:
+            type: string
+            example: agi_01HXYZABC123
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentRejectionRequest"
+            examples:
+              reject:
+                value:
+                  notes: Amount not acceptable for this vendor
+      responses:
+        "200":
+          description: Intent rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentApprovalActionResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/ErrorResponse"
+        "422":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /agent-approvals/summary:
+    get:
+      tags: [agent-commerce]
+      summary: Get approval summary metrics
+      operationId: getAgentApprovalSummary
+      responses:
+        "200":
+          description: Alias summary endpoint
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentSummaryResponse"
+        "401":
+          $ref: "#/components/responses/ErrorResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+      description: |
+        Bearer token authentication.
+        - Merchant keys: `sk_test_*`, `sk_live_*`
+        - Agent runtime keys: `ag_test_*`, `ag_live_*` (used for `POST /agent-intents`)
+
+  parameters:
+    Page:
+      in: query
+      name: page
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    Limit:
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+
+  responses:
+    ErrorResponse:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            validation:
+              value:
+                error:
+                  code: validation_error
+                  message: "Missing required field: amount"
+
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          example: ok
+        service:
+          type: string
+          example: xpayr-api
+        version:
+          type: string
+          example: v1
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          $ref: "#/components/schemas/ErrorObject"
+
+    ErrorObject:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: validation_error
+        message:
+          type: string
+          example: "Missing required field: amount"
+
+    CreatePaymentRequest:
+      type: object
+      required: [amount, currency, network]
+      properties:
+        amount:
+          type: string
+          description: Decimal amount string
+          example: "9.99"
+        currency:
+          type: string
+          example: USDC
+        network:
+          type: string
+          example: bsc-testnet
+        order_id:
+          type: string
+          example: ORDER-1001
+        description:
+          type: string
+          example: Test payment
+        success_url:
+          type: string
+          format: uri
+          example: https://merchant-site.com/success
+        cancel_url:
+          type: string
+          format: uri
+          example: https://merchant-site.com/cancel
+        ipn_callback_url:
+          type: string
+          format: uri
+          description: Optional per-session callback URL override
+          example: https://merchant-site.com/?wc-api=wc_gateway_xpayr
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Merchant-defined object echoed in status flows
+
+    PaymentSession:
+      type: object
+      required: [id, object, amount, currency, network, status, livemode]
+      properties:
+        id:
+          type: string
+          example: ps_42f492dedc5b665b8511852de5ea0325
+        invoice_id:
+          type: integer
+          format: int64
+          example: 6265178012
+        object:
+          type: string
+          enum: [payment_session]
+          example: payment_session
+        amount:
+          type: string
+          example: "9.99"
+        currency:
+          type: string
+          example: USDC
+        network:
+          type: string
+          example: bsc-testnet
+        status:
+          type: string
+          enum: [pending, processing, completed, failed, expired, confirmed]
+          example: pending
+        payment_url:
+          type: string
+          format: uri
+          example: https://xpayr.com/pay/ps_42f492dedc5b665b8511852de5ea0325
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        tx_hash:
+          type: string
+          nullable: true
+          example: 0x1111...
+        from_address:
+          type: string
+          nullable: true
+          example: 0x2222...
+        metadata:
+          type: object
+          additionalProperties: true
+          nullable: true
+        livemode:
+          type: boolean
+          example: false
+
+    PaymentListResponse:
+      type: object
+      required: [object, data]
+      properties:
+        object:
+          type: string
+          enum: [list]
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaymentSession"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
+    CompletePaymentRequest:
+      type: object
+      required: [tx_hash, from_address, chain_id]
+      properties:
+        tx_hash:
+          type: string
+          example: 0x1111111111111111111111111111111111111111111111111111111111111111
+        from_address:
+          type: string
+          example: 0x2222222222222222222222222222222222222222
+        chain_id:
+          type: integer
+          example: 97
+
+    MerchantProfile:
+      type: object
+      required: [object]
+      properties:
+        object:
+          type: string
+          example: merchant
+        merchant_id:
+          type: string
+          example: mrc_01HXYZ
+        email:
+          type: string
+          format: email
+          example: merchant@example.com
+        livemode:
+          type: boolean
+          example: false
+        plan:
+          type: string
+          example: standard
+        wallet_address:
+          type: string
+          nullable: true
+          example: 0xabc123...
+        public_key:
+          type: string
+          nullable: true
+          example: pk_test_...
+
+    MerchantBalanceResponse:
+      type: object
+      required: [object, data]
+      properties:
+        object:
+          type: string
+          enum: [balance_summary]
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              network:
+                type: string
+                example: bsc-testnet
+              currency:
+                type: string
+                example: USDC
+              confirmed_amount:
+                type: string
+                example: "124.55"
+
+    RegenerateKeyRequest:
+      type: object
+      required: [mode]
+      properties:
+        mode:
+          type: string
+          enum: [test, live]
+          example: test
+
+    RegenerateKeyResponse:
+      type: object
+      required: [mode, secret_key]
+      properties:
+        mode:
+          type: string
+          enum: [test, live]
+        secret_key:
+          type: string
+          description: Returned once; store securely.
+          example: sk_test_redacted
+
+    NetworkCatalogResponse:
+      type: object
+      required: [object, data, livemode]
+      properties:
+        object:
+          type: string
+          enum: [network_catalog]
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/NetworkCatalogItem"
+        livemode:
+          type: boolean
+
+    NetworkCatalogItem:
+      type: object
+      required: [network_key, network_name, is_testnet, currencies]
+      properties:
+        network_key:
+          type: string
+          example: bsc-testnet
+        network_name:
+          type: string
+          example: BSC Testnet
+        is_testnet:
+          type: boolean
+          example: true
+        currencies:
+          type: array
+          items:
+            $ref: "#/components/schemas/CurrencyItem"
+
+    CurrencyItem:
+      type: object
+      required: [symbol, display_name, decimals]
+      properties:
+        symbol:
+          type: string
+          example: USDC
+        display_name:
+          type: string
+          example: USDC
+        decimals:
+          type: integer
+          example: 18
+
+    CreateWebhookRequest:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+          format: uri
+          example: https://yourdomain.com/webhooks/xpayr
+
+    WebhookConfigResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        secret:
+          type: string
+          description: Returned once on create.
+          nullable: true
+          example: whsec_redacted_once
+        secret_masked:
+          type: string
+          nullable: true
+          example: whsec_****
+        events:
+          type: array
+          items:
+            type: string
+            example: payment.completed
+
+    WebhookTestResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        event:
+          type: string
+          example: payment.pending
+        delivery_id:
+          type: string
+          example: whdel_7e8d3af3
+
+    CreateAgentRequest:
+      type: object
+      required: [name, mode]
+      properties:
+        name:
+          type: string
+          example: Auto Buyer Bot
+        description:
+          type: string
+          example: Top-up automation
+        mode:
+          type: string
+          enum: [test, live]
+          example: test
+
+    CreateAgentResponse:
+      type: object
+      required: [agent_public_id]
+      properties:
+        agent_public_id:
+          type: string
+          example: agp_01HXYZABC123
+        name:
+          type: string
+          example: Auto Buyer Bot
+        mode:
+          type: string
+          enum: [test, live]
+        agent_secret_key:
+          type: string
+          nullable: true
+          description: One-time return key (`ag_test_*` or `ag_live_*`).
+          example: ag_test_redacted
+
+    AgentPolicyRequest:
+      type: object
+      properties:
+        allowed_tokens:
+          type: array
+          items:
+            type: string
+          example: [USDC, USDT]
+        allowed_networks:
+          type: array
+          items:
+            type: string
+          example: [polygon, base]
+        max_tx_amount:
+          type: number
+          format: float
+          example: 50
+        daily_limit_amount:
+          type: number
+          format: float
+          example: 300
+        approval_threshold_amount:
+          type: number
+          format: float
+          example: 40
+        min_interval_seconds:
+          type: integer
+          example: 60
+        timezone:
+          type: string
+          example: UTC
+        rule_set:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentPolicyRule"
+
+    AgentPolicyRule:
+      type: object
+      required: [id, priority, action]
+      properties:
+        id:
+          type: string
+          example: high_risk_category
+        priority:
+          type: integer
+          example: 10
+        action:
+          type: string
+          enum: [allow, reject, manual_review]
+        categories:
+          type: array
+          items:
+            type: string
+        tokens:
+          type: array
+          items:
+            type: string
+        networks:
+          type: array
+          items:
+            type: string
+        target_refs:
+          type: array
+          items:
+            type: string
+        target_prefixes:
+          type: array
+          items:
+            type: string
+        min_amount:
+          type: number
+          format: float
+        max_amount:
+          type: number
+          format: float
+        reason_code:
+          type: string
+          example: category_manual_review
+
+    AgentIntentRequest:
+      type: object
+      required: [amount, token, network, target_ref]
+      properties:
+        amount:
+          type: number
+          format: float
+          example: 25
+        token:
+          type: string
+          example: USDC
+        network:
+          type: string
+          example: polygon
+        target_ref:
+          type: string
+          example: merchant_product_123
+        category:
+          type: string
+          example: subscriptions
+
+    AgentIntentDecisionResponse:
+      type: object
+      required: [object, data]
+      properties:
+        object:
+          type: string
+          enum: [agent_intent_decision]
+        data:
+          type: object
+          required: [intent_id, decision]
+          properties:
+            intent_id:
+              type: string
+              example: agi_xxx
+            decision:
+              type: string
+              enum: [approved, pending_approval, rejected]
+            reason_code:
+              type: string
+              nullable: true
+              example: manual_approval_required
+            next_step:
+              type: string
+              nullable: true
+              example: awaiting_merchant_approval
+
+    AgentIntent:
+      type: object
+      properties:
+        intent_id:
+          type: string
+          example: agi_01HXYZABC123
+        status:
+          type: string
+          enum: [approved, pending_approval, rejected]
+        amount:
+          type: number
+          format: float
+        token:
+          type: string
+        network:
+          type: string
+        target_ref:
+          type: string
+        category:
+          type: string
+          nullable: true
+        reason_code:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    AgentIntentListResponse:
+      type: object
+      properties:
+        object:
+          type: string
+          enum: [list]
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentIntent"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
+    AgentApprovalActionRequest:
+      type: object
+      properties:
+        notes:
+          type: string
+          example: Looks valid
+        auto_bridge:
+          type: boolean
+          default: false
+        bridge_overrides:
+          type: object
+          properties:
+            success_url:
+              type: string
+              format: uri
+            cancel_url:
+              type: string
+              format: uri
+
+    AgentRejectionRequest:
+      type: object
+      properties:
+        notes:
+          type: string
+          example: Amount not acceptable for this vendor
+
+    AgentApprovalActionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        intent_id:
+          type: string
+          example: agi_01HXYZABC123
+        status:
+          type: string
+          example: approved
+        payment_session_id:
+          type: string
+          nullable: true
+          example: ps_42f492dedc5b665b8511852de5ea0325
+        payment_url:
+          type: string
+          format: uri
+          nullable: true
+          example: https://xpayr.com/pay/ps_42f492dedc5b665b8511852de5ea0325
+
+    AgentBridgeRequest:
+      type: object
+      properties:
+        success_url:
+          type: string
+          format: uri
+        cancel_url:
+          type: string
+          format: uri
+
+    AgentBridgeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        intent_id:
+          type: string
+          example: agi_01HXYZABC123
+        payment_session_id:
+          type: string
+          example: ps_42f492dedc5b665b8511852de5ea0325
+        payment_url:
+          type: string
+          format: uri
+          example: https://xpayr.com/pay/ps_42f492dedc5b665b8511852de5ea0325
+
+    AgentSummaryResponse:
+      type: object
+      properties:
+        object:
+          type: string
+          example: summary
+        agent_totals:
+          type: object
+          properties:
+            active:
+              type: integer
+            paused:
+              type: integer
+            revoked:
+              type: integer
+        intent_totals:
+          type: object
+          properties:
+            approved:
+              type: integer
+            pending_approval:
+              type: integer
+            rejected:
+              type: integer
+            execution_rate:
+              type: number
+              format: float
+        approval_totals:
+          type: object
+          properties:
+            pending:
+              type: integer
+            approved:
+              type: integer
+            rejected:
+              type: integer
+            avg_approval_seconds:
+              type: number
+              format: float
+
+    AgentApprovalListResponse:
+      type: object
+      properties:
+        object:
+          type: string
+          enum: [list]
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              intent_id:
+                type: string
+              status:
+                type: string
+                example: pending
+              created_at:
+                type: string
+                format: date-time
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 25
+        total:
+          type: integer
+          example: 1
