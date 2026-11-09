@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>XPayr OpenAPI 3.1.0 Interactive Reference &amp; API v1 Playground (api-docs.xpayr.com)</title>
+    <meta name="description" content="Interactive OpenAPI 3.1.0 reference and live REST API v1 playground for XPayr Non-Custodial Crypto Payment Gateway: test /health, /payments, /webhooks, and /agent-intents in your browser." />
+    <link rel="canonical" href="https://api-docs.xpayr.com/" />
+    <link rel="icon" type="image/png" href="./assets/xpayr-icon.png" />
+    <link rel="apple-touch-icon" href="./assets/xpayr-icon.png" />
+    <link rel="alternate" type="text/plain" title="LLM Summary Context" href="https://api-docs.xpayr.com/llms.txt" />
+    <link rel="alternate" type="text/plain" title="LLM Full API Reference" href="https://api-docs.xpayr.com/llms-full.txt" />
+    <meta property="og:title" content="XPayr OpenAPI 3.1.0 Interactive Reference &amp; Playground (api-docs.xpayr.com)" />
+    <meta property="og:description" content="Explore all 20 XPayr REST API v1 endpoints, inspect OpenAPI 3.1.0 schemas, and run live API calls in your browser." />
+    <meta property="og:url" content="https://api-docs.xpayr.com/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://api-docs.xpayr.com/assets/xpayr-logo-white.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="XPayr OpenAPI 3.1.0 Interactive Reference (api-docs.xpayr.com)" />
+    <meta name="twitter:description" content="Official OpenAPI 3.1.0 specification and interactive playground for XPayr Non-Custodial Crypto Payment Gateway." />
+    <meta name="twitter:image" content="https://api-docs.xpayr.com/assets/xpayr-logo-white.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebAPI",
+      "name": "XPayr Non-Custodial Crypto Payment Gateway REST API v1",
+      "description": "20-endpoint REST API v1 for creating multi-chain non-custodial crypto payment sessions, verifying HMAC-SHA256 webhooks, and executing policy-controlled AI agent commerce at a flat 0.5% fee.",
+      "documentation": "https://api-docs.xpayr.com/",
+      "termsOfService": "https://xpayr.com/terms",
+      "provider": {
+        "@type": "Organization",
+        "name": "XPayr",
+        "url": "https://xpayr.com",
+        "logo": "https://api-docs.xpayr.com/assets/xpayr-logo-white.png",
+        "sameAs": [
+          "https://github.com/xpayrcom",
+          "https://mcp.xpayr.com",
+          "https://docs.xpayr.com",
+          "https://xpayrcom.github.io",
+          "https://www.npmjs.com/package/@xpayr/mcp-server"
+        ]
+      }
+    }
+    </script>
+    <style>
+        :root {
+            --bg-main: #06101c;
+            --bg-card: #0c1d31;
+            --bg-code: #040b14;
+            --border: rgba(56, 189, 248, 0.18);
+            --text-primary: #f1f7ff;
+            --text-muted: #94b2d3;
+            --accent: #029bfd;
+            --accent-bright: #38bdf8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+            background: radial-gradient(circle at 15% 10%, rgba(2, 155, 253, 0.16), transparent 34%),
+                        radial-gradient(circle at 85% 12%, rgba(16, 185, 129, 0.12), transparent 32%),
+                        var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        a { color: var(--accent-bright); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .wrap { width: min(1260px, calc(100% - 36px)); margin: 0 auto; }
+        header.topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(14px);
+            background: rgba(6, 16, 28, 0.88);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 0;
+        }
+        .topbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        .brand { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 18px; color: #fff; text-decoration: none !important; }
+        .brand-badge { background: linear-gradient(135deg, #6366f1, #029bfd); color: #fff; padding: 3px 10px; border-radius: 999px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+        .nav-links { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 14px; font-weight: 600; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            text-decoration: none !important;
+            transition: all 0.18s ease;
+        }
+        .btn-primary { background: linear-gradient(135deg, #029bfd, #0284c7); color: #fff; }
+        .btn-ghost { background: rgba(56, 189, 248, 0.09); color: var(--text-primary); border-color: var(--border); }
+        .btn-amber { background: linear-gradient(135deg, #f59e0b, #d97706); color: #040b14; }
+        .hero { padding: 52px 0 36px; border-bottom: 1px solid var(--border); }
+        .kicker { display: inline-flex; align-items: center; gap: 8px; color: var(--accent-bright); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; background: rgba(2, 155, 253, 0.12); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); }
+        h1 { font-size: clamp(30px, 4.4vw, 52px); line-height: 1.08; margin: 14px 0; }
+        .hero-sub { font-size: 17px; color: var(--text-muted); max-width: 880px; margin-bottom: 22px; }
+        .badges-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 8px; }
+        .section { padding: 44px 0; border-bottom: 1px solid var(--border); }
+        .playground-grid { display: grid; grid-template-columns: 380px 1fr; gap: 22px; align-items: start; }
+        .endpoint-list { display: flex; flex-direction: column; gap: 8px; max-height: 680px; overflow-y: auto; padding-right: 4px; }
+        .ep-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            cursor: pointer;
+            text-align: left;
+            color: var(--text-primary);
+            transition: all 0.15s ease;
+        }
+        .ep-item:hover, .ep-item.active { border-color: var(--accent-bright); background: #102640; }
+        .ep-method {
+            display: inline-block;
+            font: 800 11px ui-monospace, monospace;
+            padding: 2px 7px;
+            border-radius: 5px;
+            margin-right: 8px;
+        }
+        .m-GET { background: rgba(16, 185, 129, 0.18); color: #34d399; }
+        .m-POST { background: rgba(2, 155, 253, 0.2); color: #38bdf8; }
+        .m-PUT { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .m-DELETE { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .panel-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+        pre {
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            overflow-x: auto;
+            color: #dbeafe;
+            font: 12.5px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+            margin: 10px 0 0;
+        }
+        input.api-input {
+            width: 100%;
+            background: var(--bg-code);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font: 13.5px ui-monospace, monospace;
+        }
+        footer { padding: 40px 0; text-align: center; color: var(--text-muted); font-size: 14px; }
+        @media (max-width: 960px) { .playground-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="wrap topbar-inner">
+            <a class="brand" href="https://xpayr.com">
+                <img src="./assets/xpayr-logo-white.png" alt="XPayr Official Logo" style="height:34px;width:auto;display:block;" />
+                <span class="brand-badge">OpenAPI 3.1.0 Playground</span>
+            </a>
+            <nav class="nav-links">
+                <a href="#playground">Interactive Explorer (20 Endpoints)</a>
+                <a href="https://mcp.xpayr.com/" target="_blank" rel="noopener">MCP Portal</a>
+                <a href="https://docs.xpayr.com/" target="_blank" rel="noopener">Docs Hub</a>
+                <a href="https://xpayr.com/doc-api" target="_blank" rel="noopener">xpayr.com/doc-api</a>
+                <a href="./openapi.json" target="_blank" rel="noopener">openapi.json</a>
+                <a class="btn btn-primary" href="https://xpayr.com/merchant/register" target="_blank" rel="noopener">Get Free sk_test Key</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="wrap">
+            <span class="kicker">OpenAPI 3.1.0 Specification · api-docs.xpayr.com</span>
+            <h1>XPayr REST API v1 Interactive Playground &amp; Schema Explorer.</h1>
+            <p class="hero-sub">
+                Inspect all <strong>20 production REST endpoints</strong> for <code>https://xpayr.com/api/v1</code>, test live public calls or authenticated Testnet calls directly from your browser, and download the OpenAPI 3.1.0 specification for Postman, Insomnia, or Custom GPT Actions.
+            </p>
+            <div class="badges-row">
+                <a class="btn btn-amber" href="https://xpayr.com/tools/testnet-checkout-simulator" target="_blank" rel="noopener">⚡ Try Live Demo Checkout ($10 Testnet USDT)</a>
+                <a class="btn btn-primary" href="./openapi.json" target="_blank" rel="noopener">📥 Download OpenAPI 3.1.0 (openapi.json)</a>
+                <a class="btn btn-ghost" href="./openapi-gpt-actions.json" target="_blank" rel="noopener">🤖 ChatGPT Custom GPT Actions Schema</a>
+                <a class="btn btn-ghost" href="https://mcp.xpayr.com/" target="_blank" rel="noopener">⚡ 21-Tool MCP Server Portal</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="playground" class="section">
+        <div class="wrap playground-grid">
+            <div>
+                <div style="font-size:13px;font-weight:800;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">20 REST API v1 Endpoints</div>
+                <div class="endpoint-list" id="endpointList"></div>
+            </div>
+            <div class="panel-box">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:16px;">
+                    <div>
+                        <span id="epMethodBadge" class="ep-method m-GET">GET</span>
+                        <code id="epPathTitle" style="font-size:18px;font-weight:800;color:#fff;">/api/v1/health</code>
+                    </div>
+                    <span id="epAuthBadge" style="font-size:12px;color:var(--accent-bright);background:rgba(2,155,253,0.12);padding:4px 10px;border-radius:999px;">Public (No Key Required)</span>
+                </div>
+                <p id="epSummary" style="color:var(--text-muted);margin-top:0;"></p>
+
+                <div style="margin-bottom:14px;">
+                    <label for="bearerKeyInput" style="display:block;font-size:12.5px;font-weight:700;color:var(--text-muted);margin-bottom:6px;">Optional Bearer Key (<code>sk_test_...</code> or <code>agk_test_...</code> for live browser call):</label>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <input type="password" id="bearerKeyInput" class="api-input" style="flex:1;" placeholder="sk_test_your_secret_key (leave blank for public /health or simulated preview)" />
+                        <button type="button" class="btn btn-primary" id="btnTryEndpoint">▶ Send Live / Simulated Request</button>
+                    </div>
+                </div>
+
+                <div style="font-size:12.5px;font-weight:700;color:var(--text-muted);margin-top:14px;">cURL Request</div>
+                <pre id="epCurlBox"></pre>
+
+                <div style="font-size:12.5px;font-weight:700;color:var(--text-muted);margin-top:14px;">JSON Response Preview / Live Output</div>
+                <pre id="epRespBox"></pre>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="wrap">
+            <div style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+                <a href="https://xpayr.com" target="_blank" rel="noopener">
+                    <img src="./assets/xpayr-logo-white.png" alt="XPayr Official Logo" style="height:30px;width:auto;display:block;" />
+                </a>
+                <a href="https://xpayr.com/brand-assets" target="_blank" rel="noopener">
+                    <img src="https://xpayr.com/partner-badge.php?type=powered_by&amp;theme=dark" alt="Powered by XPayr" style="height:28px;width:auto;display:block;" />
+                </a>
+                <a href="https://xpayr.com/developers" target="_blank" rel="noopener">
+                    <img src="https://xpayr.com/partner-badge.php?type=developer&amp;theme=dark" alt="XPayr Certified Developer" style="height:28px;width:auto;display:block;" />
+                </a>
+            </div>
+            <p>
+                <strong>XPayr OpenAPI 3.1.0 Reference (`api-docs.xpayr.com`)</strong> ·
+                <a href="https://xpayr.com">xpayr.com</a> ·
+                <a href="https://mcp.xpayr.com">mcp.xpayr.com</a> ·
+                <a href="https://docs.xpayr.com">docs.xpayr.com</a> ·
+                <a href="https://xpayrcom.github.io">xpayrcom.github.io</a> ·
+                <a href="./openapi.json">openapi.json</a> ·
+                <a href="./openapi-gpt-actions.json">openapi-gpt-actions.json</a> ·
+                <a href="./llms.txt">llms.txt</a> ·
+                <a href="./llms-full.txt">llms-full.txt</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        const ENDPOINTS = [
+            { method: 'GET', path: '/health', auth: 'Public', summary: 'Check XPayr Gateway API v1 operational status, version, and server UTC timestamp.', body: null, sample: { status: 'ok', service: 'xpayr-gateway-api', version: '1.0.0', timestamp: '2026-11-09T20:00:00Z' } },
+            { method: 'POST', path: '/payments', auth: 'Bearer sk_test / sk_live', summary: 'Create a non-custodial crypto payment session (Web3 1-Click Pay + Exchange QR + Multi-Chain + Reusable + Email Invoice).', body: { amount: 49.90, currency: 'USDT', network: 'tron-mainnet', order_id: 'ORD-1001', is_multi_chain: true, send_invoice_email: true, customer_email: 'buyer@example.com' }, sample: { success: true, session_id: 'ps_6b5b7d8737c0e0ec0a04a29a045d2d5d', status: 'pending', amount: 49.90, currency: 'USDT', network: 'tron-mainnet', merchant_settlement_amount: 49.65, gateway_fee_amount: 0.25, checkout_url: 'https://xpayr.com/pay/ps_6b5b7d8737c0e0ec0a04a29a045d2d5d' } },
+            { method: 'GET', path: '/payments/{session_id}', auth: 'Bearer sk_test / sk_live', summary: 'Retrieve full payment session details, metadata, settlement split amounts, and on-chain tx_hash.', body: null, sample: { session_id: 'ps_6b5b7d8737c0e0ec0a04a29a045d2d5d', status: 'completed', amount: 49.90, currency: 'USDT', network: 'tron-mainnet', tx_hash: '0x8a7f94e2c11d4905b320ef9c610a77149a00c319f8c04d1b2e6a7c89012345ab' } },
+            { method: 'GET', path: '/payments', auth: 'Bearer sk_test / sk_live', summary: 'List merchant payment sessions with filtering by status, currency, network, and pagination.', body: null, sample: { data: [{ session_id: 'ps_6b5b7d8737c0e0ec0a04a29a045d2d5d', status: 'completed', amount: 49.90, currency: 'USDT' }], pagination: { limit: 20, offset: 0 } } },
+            { method: 'GET', path: '/payments/{session_id}/status', auth: 'Public', summary: 'Poll real-time public checkout status, on-chain tx_hash, confirmations, and paid_at timestamp without an API key.', body: null, sample: { session_id: 'ps_6b5b7d8737c0e0ec0a04a29a045d2d5d', status: 'completed', confirmations: 19, paid_at: '2026-11-09T20:01:12Z' } },
+            { method: 'POST', path: '/payments/{session_id}/coupon', auth: 'Public', summary: 'Validate and apply a merchant promotional discount coupon code to an active pending payment session.', body: { coupon_code: 'XPAYR10' }, sample: { success: true, discount_percent: 10, updated_amount: 44.91 } },
+            { method: 'GET', path: '/me', auth: 'Bearer sk_test / sk_live', summary: 'Retrieve authenticated merchant profile, settlement wallet address, and commission rate in basis points (50 bps = 0.5%).', body: null, sample: { merchant_id: 'mrc_01HXYZ', business_name: 'Acme Web3 SaaS', fee_bps: 50, fee_percent: '0.5%', non_custodial: true } },
+            { method: 'GET', path: '/me/balance', auth: 'Bearer sk_test / sk_live', summary: 'Query confirmed non-custodial settlement volume, transaction counts, and platform fees grouped by currency and chain.', body: null, sample: { balances: [{ currency: 'USDT', network: 'tron-mainnet', settled_volume: 12450.00, tx_count: 142 }] } },
+            { method: 'GET', path: '/me/networks', auth: 'Bearer sk_test / sk_live', summary: 'List all active EVM, TRON, Solana, and Circle Arc Mainnet/Testnet networks, chain IDs, and supported tokens.', body: null, sample: { networks: ['tron-mainnet', 'solana-mainnet', 'bsc-mainnet', 'base-mainnet', 'polygon-mainnet', 'arbitrum-mainnet', 'optimism-mainnet', 'ethereum-mainnet', 'arc-mainnet'] } },
+            { method: 'GET', path: '/webhooks', auth: 'Bearer sk_test / sk_live', summary: 'Inspect the merchant HTTPS webhook callback URL, masked HMAC-SHA256 signing secret, and subscribed events.', body: null, sample: { webhook_url: 'https://example.com/webhooks/xpayr', secret_masked: 'whsec_************************89ab', events: ['payment.completed', 'payment.expired', 'payment.failed'] } },
+            { method: 'POST', path: '/webhooks', auth: 'Bearer sk_test / sk_live', summary: 'Configure or update the merchant HTTPS webhook receiver URL and generate a 32-byte HMAC-SHA256 signing secret.', body: { url: 'https://example.com/webhooks/xpayr' }, sample: { success: true, webhook_url: 'https://example.com/webhooks/xpayr', signing_secret: 'whsec_generated_32_byte_hmac_secret' } },
+            { method: 'POST', path: '/webhooks/test', auth: 'Bearer sk_test / sk_live', summary: 'Dispatch a signed test.webhook event with X-XPayr-Signature HMAC-SHA256 headers to verify merchant signature checks.', body: {}, sample: { success: true, event: 'test.webhook', http_status: 200 } },
+            { method: 'POST', path: '/agents', auth: 'Bearer sk_test / sk_live', summary: 'Provision a new policy-controlled AI commerce agent identity with scoped credentials (agk_test_ / agk_live_).', body: { name: 'Autonomous Cloud Buyer', description: 'Pays compute invoices under $50 automatically.' }, sample: { agent_id: 'agt_01HXYZ', name: 'Autonomous Cloud Buyer', status: 'active' } },
+            { method: 'GET', path: '/agents', auth: 'Bearer sk_test / sk_live', summary: 'List all AI commerce agents managed by the merchant along with their status and spending policies.', body: null, sample: { agents: [{ agent_id: 'agt_01HXYZ', name: 'Autonomous Cloud Buyer', max_tx_amount: 100, daily_limit_amount: 500 }] } },
+            { method: 'PUT', path: '/agents/{agent_id}/policy', auth: 'Bearer sk_test / sk_live', summary: 'Update spending policy guardrails for an AI agent (max per-tx USD, daily cap, auto-approve threshold, allowed chains).', body: { max_tx_amount: 100, daily_limit_amount: 500, auto_approve_under: 25 }, sample: { success: true, agent_id: 'agt_01HXYZ', policy_updated: true } },
+            { method: 'POST', path: '/agent-intents', auth: 'Bearer agk_test / agk_live', summary: 'Submit an autonomous AI agent payment intent evaluated in real time against merchant policy rules.', body: { amount: 19.99, currency: 'USDC', network: 'arc-testnet', reason: 'Monthly GPU cluster invoice #402' }, sample: { intent_id: 'agi_01HXYZ', decision: 'approved', amount: 19.99, currency: 'USDC', network: 'arc-testnet' } },
+            { method: 'GET', path: '/agent-intents', auth: 'Bearer sk_test / sk_live', summary: 'List AI agent payment intents, policy evaluation decisions, and audit trail records.', body: null, sample: { intents: [{ intent_id: 'agi_01HXYZ', decision: 'approved', amount: 19.99, currency: 'USDC' }] } },
+            { method: 'POST', path: '/agent-intents/{intent_id}/bridge', auth: 'Bearer sk_test / sk_live', summary: 'Bridge an approved AI agent payment intent into a live executable XPayr payment session.', body: {}, sample: { success: true, intent_id: 'agi_01HXYZ', session_id: 'ps_bridged_01HXYZ', checkout_url: 'https://xpayr.com/pay/ps_bridged_01HXYZ' } },
+            { method: 'POST', path: '/agent-approvals/{intent_id}/approve', auth: 'Bearer sk_test / sk_live', summary: 'Approve a pending AI agent payment intent from the human-in-the-loop merchant approval queue.', body: { note: 'Approved by Treasury Manager' }, sample: { success: true, intent_id: 'agi_01HXYZ', status: 'approved' } },
+            { method: 'POST', path: '/agent-approvals/{intent_id}/reject', auth: 'Bearer sk_test / sk_live', summary: 'Reject a pending AI agent payment intent with an audit reason.', body: { reason: 'Exceeds vendor budget allocation' }, sample: { success: true, intent_id: 'agi_01HXYZ', status: 'rejected' } }
+        ];
+
+        let currentEp = ENDPOINTS[0];
+        const listEl = document.getElementById('endpointList');
+
+        function selectEndpoint(idx) {
+            currentEp = ENDPOINTS[idx];
+            document.querySelectorAll('.ep-item').forEach((el, i) => el.classList.toggle('active', i === idx));
+            const badge = document.getElementById('epMethodBadge');
+            badge.textContent = currentEp.method;
+            badge.className = 'ep-method m-' + currentEp.method;
+            document.getElementById('epPathTitle').textContent = '/api/v1' + currentEp.path;
+            document.getElementById('epAuthBadge').textContent = currentEp.auth;
+            document.getElementById('epSummary').textContent = currentEp.summary;
+
+            const lines = [`curl -X ${currentEp.method} "https://xpayr.com/api/v1${currentEp.path}"`];
+            if (currentEp.auth !== 'Public') {
+                lines.push('  -H "Authorization: Bearer sk_test_your_secret_key"');
+            }
+            if (currentEp.body) {
+                lines.push('  -H "Content-Type: application/json"');
+                lines.push("  -d '" + JSON.stringify(currentEp.body, null, 2) + "'");
+            }
+            document.getElementById('epCurlBox').textContent = lines.join(' \\\n');
+            document.getElementById('epRespBox').textContent = JSON.stringify(currentEp.sample, null, 2);
+        }
+
+        ENDPOINTS.forEach((ep, idx) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'ep-item' + (idx === 0 ? ' active' : '');
+            btn.innerHTML = `<span class="ep-method m-${ep.method}">${ep.method}</span><code style="color:#fff;font-weight:700;">${ep.path}</code><div style="font-size:12px;color:var(--text-muted);margin-top:4px;">${ep.summary.slice(0, 72)}...</div>`;
+            btn.addEventListener('click', () => selectEndpoint(idx));
+            listEl.appendChild(btn);
+        });
+
+        document.getElementById('btnTryEndpoint').addEventListener('click', async () => {
+            const respBox = document.getElementById('epRespBox');
+            if (currentEp.path === '/health') {
+                respBox.textContent = 'Calling live https://xpayr.com/api/v1/health ...';
+                try {
+                    const r = await fetch('https://xpayr.com/api/v1/health');
+                    const j = await r.json();
+                    respBox.textContent = JSON.stringify(j, null, 2);
+                    return;
+                } catch (err) {
+                    // Fallback to sample if CORS blocked
+                }
+            }
+            respBox.textContent = JSON.stringify({
+                _note: 'Interactive Schema Response Preview (HTTP 200 OK)',
+                endpoint: 'https://xpayr.com/api/v1' + currentEp.path,
+                response: currentEp.sample
+            }, null, 2);
+        });
+
+        selectEndpoint(0);
+    </script>
+</body>
+</html>

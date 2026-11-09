@@ -1,0 +1,251 @@
+# XPayr MCP Server & AI Agent Commerce Portal (llms.txt)
+
+> Official Model Context Protocol (MCP) Server (@xpayr/mcp-server & xpayr-mcp), OpenAPI 3.1.0 Actions, and Developer Integration Portal for XPayr Non-Custodial Crypto Payment Gateway (https://xpayr.com).
+
+## Quick Facts for AI Assistants & Code Generators
+- **Product:** XPayr Non-Custodial Crypto Payment Gateway
+- **Official Domain:** https://xpayr.com
+- **Interactive MCP & SDK Portal:** https://mcp.xpayr.com/
+- **GitHub Organization / Profile:** https://github.com/xpayrcom
+- **MCP Server GitHub Repository:** https://github.com/xpayrcom/xpayr-mcp-server
+- **NPM Packages:** `@xpayr/mcp-server` (https://www.npmjs.com/package/@xpayr/mcp-server) and `xpayr-mcp` (https://www.npmjs.com/package/xpayr-mcp)
+- **Official MCP Registry ID:** `io.github.xpayrcom/xpayr-mcp-server`
+- **Docker GHCR Image:** `ghcr.io/xpayrcom/xpayr-mcp-server:latest`
+- **Fee Model:** Flat 0.5% (50 bps) gateway fee, zero monthly fee, direct wallet-to-wallet settlement
+- **Checkout Modes:** Dual Checkout — Web3 1-Click Pay (smart-contract split) + Direct Transfer / QR from exchanges (Binance, Bybit, OKX) with 6-second auto-polling and 1% (max $0.50) withdrawal fee tolerance
+- **Supported Networks:** TRON (TRC-20 USDT, TRX), Solana (SOL, SPL USDC/USDT), BNB Chain, Ethereum, Polygon, Arbitrum, Base, Avalanche, and Circle Arc Mainnet/Testnet (Chain ID 5042)
+
+## Instant MCP Configuration (Claude Desktop / Cursor / VS Code)
+```json
+{
+  "mcpServers": {
+    "xpayr": {
+      "command": "npx",
+      "args": ["-y", "@xpayr/mcp-server", "--suite", "all"],
+      "env": {
+        "XPAYR_API_KEY": "sk_test_your_xpayr_secret_key"
+      }
+    }
+  }
+}
+```
+
+## 21 Exposed MCP Tools
+- `xpayr_health_check` (`GET /health`): Check XPayr Gateway API v1 operational health, version, and server timestamp.
+- `xpayr_create_payment_session` (`POST /payments`): Create a non-custodial crypto payment session supporting Web3 1-Click Pay, Direct Exchange QR Transfer, Multi-Chain Links, 1-Year Reusable Links, and Automated HTML Invoice Email Delivery.
+- `xpayr_get_payment_session` (`GET /payments/{session_id}`): Retrieve full details, metadata, settlement split amounts, checkout mode, and on-chain transaction hash for a payment session.
+- `xpayr_list_payment_sessions` (`GET /payments`): List merchant crypto payment sessions with filtering by status, currency, network, and pagination.
+- `xpayr_get_public_payment_status` (`GET /payments/{session_id}/status`): Poll real-time public checkout status, on-chain tx_hash, sender wallet address, block confirmations, and paid_at timestamp without an API key.
+- `xpayr_apply_payment_coupon` (`POST /payments/{session_id}/coupon`): Validate and apply a merchant promotional discount coupon code to an active pending payment session.
+- `xpayr_get_merchant_profile` (`GET /me`): Retrieve authenticated merchant profile, settlement wallet address, commission rate in basis points (50 bps = 0.5%), and active API keys.
+- `xpayr_get_merchant_balance` (`GET /me/balance`): Query confirmed non-custodial settlement volume, transaction counts, and platform fees grouped by currency and blockchain network.
+- `xpayr_get_supported_networks` (`GET /me/networks`): List all active EVM, TRON, Solana, and Arc Mainnet/Testnet blockchain networks, chain IDs, RPC endpoints, splitter contracts, and supported tokens.
+- `xpayr_get_webhook_config` (`GET /webhooks`): Inspect the merchant webhook callback URL, masked HMAC-SHA256 signing secret, and subscribed payment lifecycle events.
+- `xpayr_set_webhook_endpoint` (`POST /webhooks`): Configure or update the merchant HTTPS webhook receiver URL and generate a fresh 32-byte HMAC-SHA256 signing secret.
+- `xpayr_send_test_webhook` (`POST /webhooks/test`): Send a signed test.webhook payload with HMAC-SHA256 headers to verify merchant webhook signature verification.
+- `xpayr_create_ai_agent` (`POST /agents`): Provision a new merchant-managed AI commerce agent identity with scoped credentials and programmable spending guardrails.
+- `xpayr_list_ai_agents` (`GET /agents`): List all AI commerce agents managed by the merchant along with their status, assigned wallets, and spending policies.
+- `xpayr_update_ai_agent_policy` (`PUT /agents/{agent_id}/policy`): Configure spending policy guardrails for an AI agent (max per-tx USD, daily cap, auto-approve threshold, allowed chains/tokens).
+- `xpayr_submit_agent_payment_intent` (`POST /agent-intents`): Submit an autonomous AI agent payment intent evaluated in real time against merchant policy rules (approved, pending_approval, rejected).
+- `xpayr_list_agent_payment_intents` (`GET /agent-intents`): List AI agent payment intents, policy evaluation decisions, and audit trail records for the merchant.
+- `xpayr_bridge_agent_intent_to_checkout` (`POST /agent-intents/{intent_id}/bridge`): Bridge an approved AI agent payment intent into a live executable XPayr payment session with hosted checkout URL and on-chain verification.
+- `xpayr_approve_agent_intent` (`POST /agent-approvals/{intent_id}/approve`): Approve a pending AI agent payment intent from the merchant approval queue and bridge it to checkout.
+- `xpayr_reject_agent_intent` (`POST /agent-approvals/{intent_id}/reject`): Reject a pending AI agent payment intent in the merchant approval queue with an audit reason.
+- `xpayr_calculate_gateway_fee_and_split` (`LOCAL /tools/crypto-payment-fee-calculator`): Deterministically calculate XPayr flat 0.5% (50 bps) gateway fee split, net merchant wallet settlement, 1% (max $0.50) exchange withdrawal tolerance, and savings vs BitPay, Coinbase Commerce, and Stripe.
+
+## Machine-Readable Schemas
+- [OpenAPI 3.1.0 Full Spec](https://mcp.xpayr.com/openapi.json)
+- [OpenAI Custom GPT Actions Spec](https://mcp.xpayr.com/openapi-gpt-actions.json)
+- [Extended LLM Reference](https://mcp.xpayr.com/llms-full.txt)
+- [Main XPayr llms.txt](https://xpayr.com/llms.txt)
+
+
+## Complete Tool Parameter Reference (JSON Schema Summary)
+### xpayr_health_check (API Gateway Health Check)
+- **Suite:** `merchant`
+- **Route:** `GET https://xpayr.com/api/v1/health`
+- **Authentication:** Public (No Key)
+- **Description:** Check XPayr Gateway API v1 operational health, version, and server timestamp.
+- **Parameters:** None
+
+### xpayr_create_payment_session (Create Crypto Payment Session (Dual Checkout))
+- **Suite:** `checkout`
+- **Route:** `POST https://xpayr.com/api/v1/payments`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** Create a non-custodial crypto payment session supporting Web3 1-Click Pay, Direct Exchange QR Transfer, Multi-Chain Links, 1-Year Reusable Links, and Automated HTML Invoice Email Delivery.
+- **Parameters:** 
+  - `amount` (number, required): Invoice amount in USD/token units. Example: `49.9`
+  - `currency` (string, required): Token symbol (USDT, USDC, SOL, TRX, BNB, ETH, MATIC). Example: `"USDT"`
+  - `network` (string, optional): Network key (tron-mainnet, solana-mainnet, bsc-mainnet, base-mainnet, arc-mainnet). Example: `"tron-mainnet"`
+  - `order_id` (string, optional): Merchant order reference ID. Example: `"ORD-1001"`
+  - `description` (string, optional): Order description shown at checkout. Example: `"Pro SaaS Annual Plan"`
+  - `is_multi_chain` (boolean, optional): Allow buyer to dynamically select any active network and token at checkout. Example: `true`
+  - `is_reusable` (boolean, optional): Keep link active for 1 year for repeat payments. Example: `false`
+  - `send_invoice_email` (boolean, optional): Dispatch branded HTML invoice email to customer_email. Example: `true`
+  - `customer_email` (string, optional): Customer email for invoice delivery. Example: `"buyer@example.com"`
+  - `ipn_callback_url` (string, optional): HTTPS webhook endpoint URL. Example: `"https://example.com/webhooks/xpayr"`
+
+### xpayr_get_payment_session (Get Payment Session Details)
+- **Suite:** `checkout`
+- **Route:** `GET https://xpayr.com/api/v1/payments/{session_id}`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** Retrieve full details, metadata, settlement split amounts, checkout mode, and on-chain transaction hash for a payment session.
+- **Parameters:** 
+  - `session_id` (string, required): Payment session ID. Example: `"ps_6b5b7d8737c0e0ec0a04a29a045d2d5d"`
+
+### xpayr_list_payment_sessions (List Merchant Payment Sessions)
+- **Suite:** `checkout`
+- **Route:** `GET https://xpayr.com/api/v1/payments`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** List merchant crypto payment sessions with filtering by status, currency, network, and pagination.
+- **Parameters:** 
+  - `status` (string, optional): Filter by status (pending, completed, expired, failed). Example: `"completed"`
+  - `currency` (string, optional): Filter by token symbol. Example: `"USDT"`
+  - `network` (string, optional): Filter by blockchain network key. Example: `"tron-mainnet"`
+  - `limit` (integer, optional): Records per page (1-100). Example: `20`
+
+### xpayr_get_public_payment_status (Poll Public On-Chain Payment Status)
+- **Suite:** `checkout`
+- **Route:** `GET https://xpayr.com/api/v1/payments/{session_id}/status`
+- **Authentication:** Public (No Key)
+- **Description:** Poll real-time public checkout status, on-chain tx_hash, sender wallet address, block confirmations, and paid_at timestamp without an API key.
+- **Parameters:** 
+  - `session_id` (string, required): Payment session ID. Example: `"ps_6b5b7d8737c0e0ec0a04a29a045d2d5d"`
+
+### xpayr_apply_payment_coupon (Apply Checkout Discount Coupon)
+- **Suite:** `checkout`
+- **Route:** `POST https://xpayr.com/api/v1/payments/{session_id}/coupon`
+- **Authentication:** Public (No Key)
+- **Description:** Validate and apply a merchant promotional discount coupon code to an active pending payment session.
+- **Parameters:** 
+  - `session_id` (string, required): Target payment session ID. Example: `"ps_6b5b7d8737c0e0ec0a04a29a045d2d5d"`
+  - `coupon_code` (string, required): Discount coupon code. Example: `"XPAYR-DEMO"`
+
+### xpayr_get_merchant_profile (Get Merchant Profile & Settlement Wallet)
+- **Suite:** `merchant`
+- **Route:** `GET https://xpayr.com/api/v1/me`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** Retrieve authenticated merchant profile, settlement wallet address, commission rate in basis points (50 bps = 0.5%), and active API keys.
+- **Parameters:** None
+
+### xpayr_get_merchant_balance (Get Multi-Chain Settlement Volume & Balance)
+- **Suite:** `merchant`
+- **Route:** `GET https://xpayr.com/api/v1/me/balance`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** Query confirmed non-custodial settlement volume, transaction counts, and platform fees grouped by currency and blockchain network.
+- **Parameters:** None
+
+### xpayr_get_supported_networks (List Supported Networks, Chains & Tokens)
+- **Suite:** `merchant`
+- **Route:** `GET https://xpayr.com/api/v1/me/networks`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** List all active EVM, TRON, Solana, and Arc Mainnet/Testnet blockchain networks, chain IDs, RPC endpoints, splitter contracts, and supported tokens.
+- **Parameters:** None
+
+### xpayr_get_webhook_config (Get Webhook Configuration & Events)
+- **Suite:** `webhooks`
+- **Route:** `GET https://xpayr.com/api/v1/webhooks`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** Inspect the merchant webhook callback URL, masked HMAC-SHA256 signing secret, and subscribed payment lifecycle events.
+- **Parameters:** None
+
+### xpayr_set_webhook_endpoint (Configure HTTPS Webhook Endpoint)
+- **Suite:** `webhooks`
+- **Route:** `POST https://xpayr.com/api/v1/webhooks`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** Configure or update the merchant HTTPS webhook receiver URL and generate a fresh 32-byte HMAC-SHA256 signing secret.
+- **Parameters:** 
+  - `url` (string, required): HTTPS webhook endpoint URL. Example: `"https://example.com/webhooks/xpayr"`
+
+### xpayr_send_test_webhook (Dispatch Signed Test Webhook Event)
+- **Suite:** `webhooks`
+- **Route:** `POST https://xpayr.com/api/v1/webhooks/test`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** Send a signed test.webhook payload with HMAC-SHA256 headers to verify merchant webhook signature verification.
+- **Parameters:** None
+
+### xpayr_create_ai_agent (Create Policy-Controlled AI Commerce Agent)
+- **Suite:** `agents`
+- **Route:** `POST https://xpayr.com/api/v1/agents`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** Provision a new merchant-managed AI commerce agent identity with scoped credentials and programmable spending guardrails.
+- **Parameters:** 
+  - `name` (string, required): AI agent display name. Example: `"Autonomous Cloud Buyer"`
+  - `description` (string, optional): Operational scope. Example: `"Pays API and compute invoices under $50 automatically."`
+  - `wallet_address` (string, optional): Optional agent execution wallet. Example: `"0x71C...89A"`
+
+### xpayr_list_ai_agents (List Merchant AI Commerce Agents)
+- **Suite:** `agents`
+- **Route:** `GET https://xpayr.com/api/v1/agents`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** List all AI commerce agents managed by the merchant along with their status, assigned wallets, and spending policies.
+- **Parameters:** None
+
+### xpayr_update_ai_agent_policy (Update AI Agent Spending Guardrails)
+- **Suite:** `agents`
+- **Route:** `PUT https://xpayr.com/api/v1/agents/{agent_id}/policy`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** Configure spending policy guardrails for an AI agent (max per-tx USD, daily cap, auto-approve threshold, allowed chains/tokens).
+- **Parameters:** 
+  - `agent_id` (string, required): Target AI agent public ID. Example: `"agt_01HXYZ"`
+  - `max_tx_amount` (number, optional): Maximum single transaction USD amount. Example: `100`
+  - `daily_limit_amount` (number, optional): Maximum daily cumulative USD spend. Example: `500`
+  - `auto_approve_under` (number, optional): Auto-approve threshold in USD. Example: `25`
+
+### xpayr_submit_agent_payment_intent (Submit Autonomous AI Agent Payment Intent)
+- **Suite:** `agents`
+- **Route:** `POST https://xpayr.com/api/v1/agent-intents`
+- **Authentication:** Bearer agk_test / agk_live
+- **Description:** Submit an autonomous AI agent payment intent evaluated in real time against merchant policy rules (approved, pending_approval, rejected).
+- **Parameters:** 
+  - `amount` (number, required): Requested payment amount. Example: `19.99`
+  - `currency` (string, required): Token symbol (USDC, USDT). Example: `"USDC"`
+  - `network` (string, optional): Target blockchain network. Example: `"arc-testnet"`
+  - `recipient_address` (string, optional): Destination wallet address. Example: `"0xb0bD2f3A86db752dA693D8a686C406E269E57c99"`
+  - `reason` (string, optional): Payment justification memo. Example: `"Monthly GPU cluster invoice #402"`
+
+### xpayr_list_agent_payment_intents (List AI Agent Payment Intents & Audit Logs)
+- **Suite:** `agents`
+- **Route:** `GET https://xpayr.com/api/v1/agent-intents`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** List AI agent payment intents, policy evaluation decisions, and audit trail records for the merchant.
+- **Parameters:** 
+  - `status` (string, optional): Filter by decision status. Example: `"approved"`
+  - `limit` (integer, optional): Maximum records to return. Example: `20`
+
+### xpayr_bridge_agent_intent_to_checkout (Bridge Approved Agent Intent to Checkout Session)
+- **Suite:** `agents`
+- **Route:** `POST https://xpayr.com/api/v1/agent-intents/{intent_id}/bridge`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** Bridge an approved AI agent payment intent into a live executable XPayr payment session with hosted checkout URL and on-chain verification.
+- **Parameters:** 
+  - `intent_id` (string, required): Approved agent payment intent ID. Example: `"agi_01HXYZ"`
+
+### xpayr_approve_agent_intent (Approve Pending AI Agent Intent (Human-in-the-Loop))
+- **Suite:** `agents`
+- **Route:** `POST https://xpayr.com/api/v1/agent-approvals/{intent_id}/approve`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** Approve a pending AI agent payment intent from the merchant approval queue and bridge it to checkout.
+- **Parameters:** 
+  - `intent_id` (string, required): Pending agent intent ID. Example: `"agi_01HXYZ"`
+  - `note` (string, optional): Approval note. Example: `"Approved by Treasury Manager"`
+
+### xpayr_reject_agent_intent (Reject Pending AI Agent Intent)
+- **Suite:** `agents`
+- **Route:** `POST https://xpayr.com/api/v1/agent-approvals/{intent_id}/reject`
+- **Authentication:** Bearer sk_test / sk_live
+- **Description:** Reject a pending AI agent payment intent in the merchant approval queue with an audit reason.
+- **Parameters:** 
+  - `intent_id` (string, required): Pending agent intent ID. Example: `"agi_01HXYZ"`
+  - `reason` (string, optional): Rejection reason. Example: `"Exceeds vendor budget allocation"`
+
+### xpayr_calculate_gateway_fee_and_split (0.5% Gateway Fee Split & Exchange Tolerance Calculator)
+- **Suite:** `merchant`
+- **Route:** `LOCAL https://xpayr.com/api/v1/tools/crypto-payment-fee-calculator`
+- **Authentication:** Offline / Public
+- **Description:** Deterministically calculate XPayr flat 0.5% (50 bps) gateway fee split, net merchant wallet settlement, 1% (max $0.50) exchange withdrawal tolerance, and savings vs BitPay, Coinbase Commerce, and Stripe.
+- **Parameters:** 
+  - `amount` (number, optional): Transaction or monthly volume amount in USD/USDT. Example: `1000`
+  - `currency` (string, optional): Settlement token symbol. Example: `"USDT"`
+  - `network` (string, optional): Target blockchain network. Example: `"tron-mainnet"`
+
