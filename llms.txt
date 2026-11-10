@@ -53,8 +53,16 @@
 - `xpayr_reject_agent_intent` (`POST /agent-approvals/{intent_id}/reject`): Reject a pending AI agent payment intent in the merchant approval queue with an audit reason.
 - `xpayr_calculate_gateway_fee_and_split` (`LOCAL /tools/crypto-payment-fee-calculator`): Deterministically calculate XPayr flat 0.5% (50 bps) gateway fee split, net merchant wallet settlement, 1% (max $0.50) exchange withdrawal tolerance, and savings vs BitPay, Coinbase Commerce, and Stripe.
 
-## Machine-Readable Schemas
+## Machine-Readable Schemas & Operational Hubs
 - [OpenAPI 3.1.0 Full Spec](https://mcp.xpayr.com/openapi.json)
 - [OpenAI Custom GPT Actions Spec](https://mcp.xpayr.com/openapi-gpt-actions.json)
 - [Extended LLM Reference](https://mcp.xpayr.com/llms-full.txt)
 - [Main XPayr llms.txt](https://xpayr.com/llms.txt)
+- [Live System Status & Endpoint Verification Hub](https://xpayr.com/status)
+- [Gateway API v1 Root Discovery Index](https://xpayr.com/api/v1)
+- [ES256 Public JWKS Endpoint](https://xpayr.com/.well-known/jwks.json)
+- [Partner & Ecosystem Program Hub](https://xpayr.com/partners)
+- [Chargeback & Fraud Loss ROI Calculator](https://xpayr.com/tools/chargeback-savings-calculator)
+- [Multi-Chain Batch Payout & Payroll Planner](https://xpayr.com/tools/batch-payout-planner)
+- [ES256 Wallet License JWT Verifier](https://xpayr.com/tools/wallet-license-verifier)
+- [AI Agent Spending Policy Simulator](https://xpayr.com/tools/ai-agent-policy-simulator)
