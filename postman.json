@@ -1,0 +1,536 @@
+{
+    "info": {
+        "_postman_id": "818c9d51-f907-4549-9990-a72c93a7e6ef",
+        "name": "XPayr Non-Custodial Crypto Payment Gateway & AI Agent API v1 (v2026.11.6)",
+        "description": "Official Postman Collection v2.1 for XPayr (https://xpayr.com). Supports Dual Checkout (Web3 1-Click + Direct Exchange QR), 12 blockchains, HMAC-SHA256 webhooks, and AI Agent Commerce guardrails at a flat 0.5% fee.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{XPAYR_API_KEY}}",
+                "type": "string"
+            }
+        ]
+    },
+    "variable": [
+        {
+            "key": "XPAYR_BASE_URL",
+            "value": "https://xpayr.com/api/v1",
+            "type": "string"
+        },
+        {
+            "key": "XPAYR_API_KEY",
+            "value": "sk_test_replace_with_your_key",
+            "type": "string"
+        },
+        {
+            "key": "XPAYR_WEBHOOK_SECRET",
+            "value": "whsec_replace_with_your_secret",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "System Health",
+            "item": [
+                {
+                    "name": "API Gateway Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/health",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "Check XPayr Gateway API v1 operational health, version, and server timestamp.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Payments & Dual Checkout",
+            "item": [
+                {
+                    "name": "Create Crypto Payment Session (Dual Checkout)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/payments",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "payments"
+                            ]
+                        },
+                        "description": "Create a non-custodial crypto payment session supporting Web3 1-Click Pay, Direct Exchange QR Transfer, Multi-Chain Links, 1-Year Reusable Links, and Automated HTML Invoice Email Delivery.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 49.9,\n    \"currency\": \"USDT\",\n    \"network\": \"tron-mainnet\",\n    \"order_id\": \"ORD-1001\",\n    \"description\": \"Pro SaaS Annual Plan\",\n    \"is_multi_chain\": true,\n    \"is_reusable\": false,\n    \"send_invoice_email\": true,\n    \"customer_email\": \"buyer@example.com\",\n    \"ipn_callback_url\": \"https://example.com/webhooks/xpayr\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "List Merchant Payment Sessions",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/payments",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "payments"
+                            ]
+                        },
+                        "description": "List merchant crypto payment sessions with filtering by status, currency, network, and pagination."
+                    }
+                },
+                {
+                    "name": "Get Payment Session Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/payments/{session_id}",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "payments",
+                                ":session_id"
+                            ]
+                        },
+                        "description": "Retrieve full details, metadata, settlement split amounts, checkout mode, and on-chain transaction hash for a payment session."
+                    }
+                },
+                {
+                    "name": "Poll Public On-Chain Payment Status",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/payments/{session_id}/status",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "payments",
+                                ":session_id",
+                                "status"
+                            ]
+                        },
+                        "description": "Poll real-time public checkout status, on-chain tx_hash, sender wallet address, block confirmations, and paid_at timestamp without an API key.",
+                        "auth": {
+                            "type": "noauth"
+                        }
+                    }
+                },
+                {
+                    "name": "Apply Checkout Discount Coupon",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/payments/{session_id}/coupon",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "payments",
+                                ":session_id",
+                                "coupon"
+                            ]
+                        },
+                        "description": "Validate and apply a merchant promotional discount coupon code to an active pending payment session.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"coupon_code\": \"XPAYR-DEMO\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Merchant & Treasury",
+            "item": [
+                {
+                    "name": "Get Merchant Profile & Settlement Wallet",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/me",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "me"
+                            ]
+                        },
+                        "description": "Retrieve authenticated merchant profile, settlement wallet address, commission rate in basis points (50 bps = 0.5%), and active API keys."
+                    }
+                },
+                {
+                    "name": "Get Multi-Chain Settlement Volume & Balance",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/me/balance",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "me",
+                                "balance"
+                            ]
+                        },
+                        "description": "Query confirmed non-custodial settlement volume, transaction counts, and platform fees grouped by currency and blockchain network."
+                    }
+                },
+                {
+                    "name": "List Supported Networks, Chains & Tokens",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/me/networks",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "me",
+                                "networks"
+                            ]
+                        },
+                        "description": "List all active EVM, TRON, Solana, and Arc Mainnet/Testnet blockchain networks, chain IDs, RPC endpoints, splitter contracts, and supported tokens."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Webhooks & HMAC QA",
+            "item": [
+                {
+                    "name": "Get Webhook Configuration & Events",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/webhooks",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "webhooks"
+                            ]
+                        },
+                        "description": "Inspect the merchant webhook callback URL, masked HMAC-SHA256 signing secret, and subscribed payment lifecycle events."
+                    }
+                },
+                {
+                    "name": "Configure HTTPS Webhook Endpoint",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/webhooks",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "webhooks"
+                            ]
+                        },
+                        "description": "Configure or update the merchant HTTPS webhook receiver URL and generate a fresh 32-byte HMAC-SHA256 signing secret.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"url\": \"https://example.com/webhooks/xpayr\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Dispatch Signed Test Webhook Event",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/webhooks/test",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "webhooks",
+                                "test"
+                            ]
+                        },
+                        "description": "Send a signed test.webhook payload with HMAC-SHA256 headers to verify merchant webhook signature verification."
+                    }
+                }
+            ]
+        },
+        {
+            "name": "AI Agent Commerce",
+            "item": [
+                {
+                    "name": "Create Policy-Controlled AI Commerce Agent",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/agents",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "agents"
+                            ]
+                        },
+                        "description": "Provision a new merchant-managed AI commerce agent identity with scoped credentials and programmable spending guardrails.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Autonomous Cloud Buyer\",\n    \"description\": \"Pays API and compute invoices under $50 automatically.\",\n    \"wallet_address\": \"0x71C...89A\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "List Merchant AI Commerce Agents",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/agents",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "agents"
+                            ]
+                        },
+                        "description": "List all AI commerce agents managed by the merchant along with their status, assigned wallets, and spending policies."
+                    }
+                },
+                {
+                    "name": "Update AI Agent Spending Guardrails",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/agents/{agent_id}/policy",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "agents",
+                                ":agent_id",
+                                "policy"
+                            ]
+                        },
+                        "description": "Configure spending policy guardrails for an AI agent (max per-tx USD, daily cap, auto-approve threshold, allowed chains/tokens).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"max_tx_amount\": 100,\n    \"daily_limit_amount\": 500,\n    \"auto_approve_under\": 25\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Submit Autonomous AI Agent Payment Intent",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/agent-intents",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "agent-intents"
+                            ]
+                        },
+                        "description": "Submit an autonomous AI agent payment intent evaluated in real time against merchant policy rules (approved, pending_approval, rejected).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 19.99,\n    \"currency\": \"USDC\",\n    \"network\": \"arc-testnet\",\n    \"recipient_address\": \"0xb0bD2f3A86db752dA693D8a686C406E269E57c99\",\n    \"reason\": \"Monthly GPU cluster invoice #402\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "List AI Agent Payment Intents & Audit Logs",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/agent-intents",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "agent-intents"
+                            ]
+                        },
+                        "description": "List AI agent payment intents, policy evaluation decisions, and audit trail records for the merchant."
+                    }
+                },
+                {
+                    "name": "Bridge Approved Agent Intent to Checkout Session",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/agent-intents/{intent_id}/bridge",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "agent-intents",
+                                ":intent_id",
+                                "bridge"
+                            ]
+                        },
+                        "description": "Bridge an approved AI agent payment intent into a live executable XPayr payment session with hosted checkout URL and on-chain verification."
+                    }
+                },
+                {
+                    "name": "Approve Pending AI Agent Intent (Human-in-the-Loop)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/agent-approvals/{intent_id}/approve",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "agent-approvals",
+                                ":intent_id",
+                                "approve"
+                            ]
+                        },
+                        "description": "Approve a pending AI agent payment intent from the merchant approval queue and bridge it to checkout.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"note\": \"Approved by Treasury Manager\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Reject Pending AI Agent Intent",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{XPAYR_BASE_URL}}/agent-approvals/{intent_id}/reject",
+                            "host": [
+                                "{{XPAYR_BASE_URL}}"
+                            ],
+                            "path": [
+                                "agent-approvals",
+                                ":intent_id",
+                                "reject"
+                            ]
+                        },
+                        "description": "Reject a pending AI agent payment intent in the merchant approval queue with an audit reason.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"reason\": \"Exceeds vendor budget allocation\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
